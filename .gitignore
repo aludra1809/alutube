@@ -60,3 +60,5 @@ keystore.properties
 signing.properties
 secrets.properties
 *.env
+
+AETHER_INTEGRATION_PLAN.md

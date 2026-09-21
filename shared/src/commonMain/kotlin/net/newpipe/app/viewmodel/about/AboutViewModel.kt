@@ -39,7 +39,7 @@ class AboutViewModel(
             val aboutLibraries = json.decodeFromString<AboutLibraries>(
                 resourceHandler.readResourceToString(PATH_BOM)
             )
-            _libraries.value = aboutLibraries.libraries
+            _libraries.value = aboutLibraries.libraries + STATIC_LIBRARIES
         } catch (exception: Exception) {
             Logger.e(messageString = "Failed to parse BOM", throwable = exception)
         }
@@ -47,5 +47,25 @@ class AboutViewModel(
 
     companion object {
         private const val PATH_BOM = "aboutlibraries.json"
+
+        // Vendored native libraries that are not Gradle dependencies, so they
+        // do not appear in the generated AboutLibraries BOM. Listed statically
+        // so the in-app About -> License screen gives them attribution.
+        private val STATIC_LIBRARIES = listOf(
+            Library(
+                id = "aether",
+                name = "Aether",
+                developers = listOf(Developer(name = "CluvexStudio")),
+                licenses = listOf("AGPL-3.0-only"),
+                website = "https://github.com/CluvexStudio/Aether"
+            ),
+            Library(
+                id = "quiche",
+                name = "quiche",
+                developers = listOf(Developer(name = "Cloudflare, Inc.")),
+                licenses = listOf("BSD-2-Clause"),
+                website = "https://github.com/cloudflare/quiche"
+            )
+        )
     }
 }

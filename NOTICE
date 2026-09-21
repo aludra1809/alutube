@@ -1,0 +1,50 @@
+Alutube — Third-Party Notices
+==============================
+
+Alutube is distributed under the GNU General Public License, version 3 or
+later (GPL-3.0-or-later) for its NewPipe-derived code, and the combined
+application is offered under AGPL-3.0-compatible terms because it embeds
+Aether (see the Licensing section of AETHER_INTEGRATION_PLAN.md and the
+LICENSE file).
+
+The following upstream projects are incorporated. Their full license texts
+are in the LICENSE/COPYING files of the respective projects (vendored in
+this repository) and shown in the app's in-app "About → License" screen.
+
+1. NewPipe
+   Copyright (C) 2015-2026 NewPipe contributors and NewPipe e.V.
+   Homepage: https://newpipe.net
+   Repository: https://github.com/TeamNewPipe/NewPipe
+   License: GNU General Public License v3.0-or-later
+   License file: LICENSE (repo root)
+   Changes: rebranded as Alutube, Aether networking integrated, app identity
+   and package metadata modified.
+
+2. NewPipe Extractor
+   Copyright (C) Christian Schabesberger and NewPipe contributors.
+   Repository: https://github.com/TeamNewPipe/NewPipeExtractor
+   License: GNU General Public License v3.0-or-later
+   Distributed as a binary dependency (JitPack, pinned commit
+   13a655fe53e0c3065f88725fc1fb594c3ede0169).
+
+3. Aether
+   Copyright (C) CluvexStudio
+   Repository: https://github.com/CluvexStudio/Aether
+   License: GNU Affero General Public License v3.0-only (AGPL-3.0-only)
+   License file: aether/LICENSE
+   Pinned: v2.0.0 (commit 0e6f6a5), vendored at aether/
+
+4. quiche (Cloudflare), vendored inside the Aether repository
+   Copyright (C) 2018-2019, Cloudflare, Inc.
+   License: BSD-2-Clause (Cloudflare license)
+   License file: aether/quiche/COPYING
+
+5. BoringSSL
+   Built by the `boring`/`boring-sys` crates at Aether build time.
+   License: ISC/OpenSSL-style (Google BoringSSL source-availability license).
+
+Other third-party dependencies (smoltcp, ring, tokio, boringtun, h2,
+octets, etc.) are credited automatically in the in-app About → License
+screen via the AboutLibraries-generated bill of materials.
+
+This file must be preserved with the app distribution.
