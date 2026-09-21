@@ -1,0 +1,62 @@
+.gradle/
+local.properties
+.DS_Store
+**/build/
+!src/**/build/
+captures/
+.idea/
+*.iml
+*~
+.weblate
+.kotlin
+*.class
+app/debug/
+app/release/
+
+# vscode / eclipse files
+*.classpath
+*.project
+*.settings
+bin/
+.vscode/
+*.code-workspace
+
+# xcode files
+xcuserdata
+.externalNativeBuild
+.cxx
+node_modules/
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/xcshareddata/
+!*.xcodeproj/project.xcworkspace/
+!*.xcworkspace/contents.xcworkspacedata
+**/xcshareddata/WorkspaceSettings.xcsettings
+
+# ---- Alutube / Aether integration ----
+# Rust / Cargo build outputs
+target/
+**/target/
+.cargo/
+*.cargo/config.toml
+
+# NDK / native build artifacts (generated, not committed)
+**/jniLibs/
+app/src/main/jniLibs/
+!**/jniLibs/*.so
+
+# Aether identity / state files (private keys!) - never commit
+aether*.toml
+**/*-lastconn.toml
+**/*-secondary.toml
+*.pem
+*.key
+*.crt
+
+# Signing and secrets
+*.jks
+*.keystore
+keystore.properties
+signing.properties
+secrets.properties
+*.env
