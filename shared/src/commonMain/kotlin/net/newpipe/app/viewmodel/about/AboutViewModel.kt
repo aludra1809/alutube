@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import net.newpipe.app.model.AboutLibraries
+import net.newpipe.app.model.Developer
 import net.newpipe.app.model.Library
 import net.newpipe.app.platform.ResourceHandler
 import org.koin.core.annotation.KoinViewModel

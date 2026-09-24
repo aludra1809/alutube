@@ -97,6 +97,28 @@ Also, since they are free and open source software, neither the app nor the Extr
 <!-- Hidden span to keep old links compatible. You should remove this span if you're translating the README into another language.-->
 <span id="updates"></span>
 
+## Building
+
+Requirements for a normal Android build:
+
+- JDK 21 (e.g. Temurin)
+- Android SDK with `platforms;android-37` and `build-tools` (AGP 9.3.1, see `gradle/libs.versions.toml`)
+
+Building the Aether networking component additionally requires (see `docs/toolchain.md` and `.github/workflows/aether-native.yml`):
+
+- Rust stable >= 1.98 with targets `aarch64-linux-android`, `armv7-linux-androideabi`, `x86_64-linux-android`
+- [cargo-ndk](https://github.com/bbqsrc/cargo-ndk)
+- Android NDK r26d (`ANDROID_NDK_HOME` / `ANDROID_NDK_ROOT`)
+- CMake and a C/C++ compiler on the host (BoringSSL is built by `boring-sys`)
+
+The native library is built by Gradle (no manual `.so` copies):
+
+```bash
+./gradlew assembleDebug          # builds Aether natively and packages libaether.so
+./gradlew assembleDebug -PaetherNative=off   # skip native build (CI without Rust)
+./gradlew :app:aetherBuildNative # build the native library only
+```
+
 ## Installation and updates
 You can install NewPipe using one of the following methods:
  1. Add our custom repo to F-Droid and install it from there. The instructions are here: https://newpipe.net/FAQ/tutorials/install-add-fdroid-repo/
