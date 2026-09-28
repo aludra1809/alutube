@@ -224,6 +224,10 @@ dependencies {
     implementation(libs.newpipe.extractor)
     implementation(libs.newpipe.filepicker)
 
+    // kotlinx-serialization (also used by the shared module; needed by the
+    // Aether integration layer for FFI JSON marshalling on the JVM tests)
+    implementation(libs.kotlinx.serialization.json)
+
     // Checkstyle
     checkstyle(libs.puppycrawl.checkstyle)
     ktlint(libs.pinterest.ktlint)
@@ -319,6 +323,7 @@ dependencies {
     // Testing
     testImplementation(libs.junit)
     testImplementation(libs.mockito.core)
+    testImplementation(libs.kotlinx.coroutines.test)
 
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.runner)

@@ -1,0 +1,22 @@
+[package]
+name = "aether-bridge"
+version = "0.1.0"
+edition = "2021"
+publish = false
+license = "AGPL-3.0-only"
+
+[lib]
+name = "aether_bridge"
+crate-type = ["cdylib"]
+
+[dependencies]
+aether = { path = "../aether/aether" }
+jni = "0.21"
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+
+[profile.dev]
+opt-level = 1
