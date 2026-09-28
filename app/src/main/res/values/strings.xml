@@ -905,4 +905,29 @@
     <string name="api23_requirement_dialog_title">NewPipe is dropping support for Android 5</string>
     <string name="api23_requirement_dialog_message">Unfortunately NewPipe depends on a few libraries that dropped support for Android 5.0 and 5.1. The next NewPipe release will therefore only work on devices with Android 6 or higher, sadly. Read more in the blogpost.</string>
     <string name="api23_requirement_dialog_blogpost">Blogpost</string>
+
+    <!-- Aether connection (Alutube) -->
+    <string name="settings_category_aether_title">Alutube connection</string>
+    <string name="aether_enabled_title">Enable Alutube connection</string>
+    <string name="aether_enabled_summary_on">All Alutube network traffic is routed through the encrypted Alutube tunnel.</string>
+    <string name="aether_enabled_summary_off">Alutube uses a direct internet connection.</string>
+    <string name="aether_protocol_title">Protocol</string>
+    <string name="aether_protocol_masque">MASQUE</string>
+    <string name="aether_protocol_wireguard">WireGuard</string>
+    <string name="aether_scan_mode_title">Scan mode</string>
+    <string name="aether_scan_mode_turbo">Turbo</string>
+    <string name="aether_scan_mode_balanced">Balanced</string>
+    <string name="aether_scan_mode_thorough">Thorough</string>
+    <string name="aether_scan_mode_stealth">Stealth</string>
+    <string name="aether_scan_mode_ironclad">Ironclad</string>
+    <string name="aether_status_title">Status</string>
+    <string name="aether_status_disabled">Disabled</string>
+    <string name="aether_status_starting">Connecting…</string>
+    <string name="aether_status_scanning">Finding a secure endpoint…</string>
+    <string name="aether_status_connecting">Connecting…</string>
+    <string name="aether_status_running">Connected</string>
+    <string name="aether_status_reconnecting">Reconnecting…</string>
+    <string name="aether_status_stopped">Stopped</string>
+    <string name="aether_status_error">Connection error</string>
+    <string name="aether_reconnect_summary">The Alutube connection will restart automatically when you change these settings.</string>
 </resources>

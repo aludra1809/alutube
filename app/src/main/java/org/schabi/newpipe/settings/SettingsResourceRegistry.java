@@ -31,6 +31,7 @@ public final class SettingsResourceRegistry {
     private SettingsResourceRegistry() {
         add(MainSettingsFragment.class, R.xml.main_settings).setSearchable(false);
 
+        add(AetherSettingsFragment.class, R.xml.aether_settings);
         add(AppearanceSettingsFragment.class, R.xml.appearance_settings);
         add(ContentSettingsFragment.class, R.xml.content_settings);
         add(DebugSettingsFragment.class, R.xml.debug_settings).setSearchable(false);

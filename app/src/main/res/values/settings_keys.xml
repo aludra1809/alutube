@@ -1525,4 +1525,33 @@
         <item>@string/image_quality_medium_key</item>
         <item>@string/image_quality_high_key</item>
     </string-array>
+
+    <!-- Aether connection -->
+    <string name="aether_enabled_key">aether_enabled</string>
+    <string name="aether_protocol_key">aether_protocol</string>
+    <string name="aether_scan_mode_key">aether_scan_mode</string>
+    <string name="aether_protocol_default">masque</string>
+    <string name="aether_scan_mode_default">balanced</string>
+    <string-array name="aether_protocol_values">
+        <item>masque</item>
+        <item>wg</item>
+    </string-array>
+    <string-array name="aether_protocol_descriptions">
+        <item>@string/aether_protocol_masque</item>
+        <item>@string/aether_protocol_wireguard</item>
+    </string-array>
+    <string-array name="aether_scan_mode_values">
+        <item>turbo</item>
+        <item>balanced</item>
+        <item>thorough</item>
+        <item>stealth</item>
+        <item>ironclad</item>
+    </string-array>
+    <string-array name="aether_scan_mode_descriptions">
+        <item>@string/aether_scan_mode_turbo</item>
+        <item>@string/aether_scan_mode_balanced</item>
+        <item>@string/aether_scan_mode_thorough</item>
+        <item>@string/aether_scan_mode_stealth</item>
+        <item>@string/aether_scan_mode_ironclad</item>
+    </string-array>
 </resources>

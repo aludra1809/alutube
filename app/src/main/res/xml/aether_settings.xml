@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:key="general_preferences"
+    android:title="@string/settings_category_aether_title">
+
+    <SwitchPreferenceCompat
+        android:defaultValue="false"
+        android:key="@string/aether_enabled_key"
+        android:summaryOff="@string/aether_enabled_summary_off"
+        android:summaryOn="@string/aether_enabled_summary_on"
+        android:title="@string/aether_enabled_title"
+        app:iconSpaceReserved="false"
+        app:singleLineTitle="false" />
+
+    <Preference
+        android:key="@string/aether_status_title"
+        android:title="@string/aether_status_title"
+        android:summary="@string/aether_status_disabled"
+        app:iconSpaceReserved="false"
+        app:singleLineTitle="false" />
+
+    <ListPreference
+        android:defaultValue="@string/aether_protocol_default"
+        android:entries="@array/aether_protocol_descriptions"
+        android:entryValues="@array/aether_protocol_values"
+        android:key="@string/aether_protocol_key"
+        android:summary="%s"
+        android:title="@string/aether_protocol_title"
+        app:iconSpaceReserved="false"
+        app:singleLineTitle="false" />
+
+    <ListPreference
+        android:defaultValue="@string/aether_scan_mode_default"
+        android:entries="@array/aether_scan_mode_descriptions"
+        android:entryValues="@array/aether_scan_mode_values"
+        android:key="@string/aether_scan_mode_key"
+        android:summary="%s"
+        android:title="@string/aether_scan_mode_title"
+        app:iconSpaceReserved="false"
+        app:singleLineTitle="false" />
+
+    <Preference
+        android:key="aether_restart_note"
+        android:summary="@string/aether_reconnect_summary"
+        android:title="@string/aether_reconnect_summary"
+        app:iconSpaceReserved="false"
+        app:singleLineTitle="false" />
+</PreferenceScreen>
