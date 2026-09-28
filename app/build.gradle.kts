@@ -54,6 +54,13 @@ configure<ApplicationExtension> {
         System.getProperty("versionNameSuffix")?.let { versionNameSuffix = it }
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Aether is built for arm64-v8a, armeabi-v7a and x86_64 only (no
+        // x86-32 target upstream). Excluding x86 prevents accidental installs
+        // on 32-bit x86 devices where libaether_bridge.so cannot load.
+        ndk {
+            abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64")
+        }
     }
 
     buildTypes {

@@ -69,9 +69,9 @@ jobs:
     strategy:
       matrix:
         include:
-          - api-level: 23
-            target: default
-            arch: x86
+          # Aether's native library is built for arm64-v8a, armeabi-v7a and
+          # x86_64 only (no x86 32-bit target upstream), so the 32-bit x86
+          # emulator row was dropped; x86_64 is retained for emulator tests.
           - api-level: 35
             target: default
             arch: x86_64
