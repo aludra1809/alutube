@@ -14,6 +14,7 @@ import org.schabi.newpipe.extractor.exceptions.ReCaptchaException;
 import org.schabi.newpipe.util.InfoCache;
 
 import java.io.IOException;
+import java.net.Proxy;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -40,10 +41,15 @@ public final class DownloaderImpl extends Downloader {
 
     private static DownloaderImpl instance;
     private final Map<String, String> mCookies;
-    private final OkHttpClient client;
+    private volatile OkHttpClient client;
 
     private DownloaderImpl(final OkHttpClient.Builder builder) {
-        this.client = builder
+        this.client = buildClient(builder);
+        this.mCookies = new HashMap<>();
+    }
+
+    private static OkHttpClient buildClient(final OkHttpClient.Builder builder) {
+        return builder
                 .readTimeout(30, TimeUnit.SECONDS)
 //                .cache(new Cache(new File(context.getExternalCacheDir(), "okhttp"),
 //                        16 * 1024 * 1024))
@@ -51,7 +57,23 @@ public final class DownloaderImpl extends Downloader {
                         Brotli.INSTANCE,
                         Gzip.INSTANCE))
                 .build();
-        this.mCookies = new HashMap<>();
+    }
+
+    /**
+     * Rebuild the underlying OkHttpClient so that all extractor requests and
+     * Coil image loads are routed through the given proxy. When the proxy is
+     * {@code null}, the client is reset to the exact original configuration
+     * (direct connection). AetherNetworkController invokes this when the
+     * tunnel starts/stops; the local loopback listener is never proxied.
+     *
+     * @param proxy the Aether SOCKS5/HTTP proxy, or {@code null} for direct
+     */
+    public synchronized void setProxy(@Nullable final Proxy proxy) {
+        final OkHttpClient.Builder builder = new OkHttpClient.Builder();
+        if (proxy != null) {
+            builder.proxy(proxy);
+        }
+        this.client = buildClient(builder);
     }
 
     @NonNull

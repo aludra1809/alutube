@@ -89,18 +89,30 @@ class AetherNetworkControllerTest {
         private val verifyJobId = 99L
     }
 
-    /** Creates a controller bound to the test scheduler. */
-    private fun TestScope.controllerWith(
-        tmpDir: File,
-        bridge: FakeAetherBridge
-    ): Pair<AetherNetworkController, CoroutineScope> {
+/** Creates a controller bound to the test scheduler. */
+    private fun TestScope.controllerWith(tmpDir: File, bridge: FakeAetherBridge, router: AetherTrafficRouter = FakeRouter()): Pair<AetherNetworkController, CoroutineScope> {
         val scope = CoroutineScope(SupervisorJob() + UnconfinedTestDispatcher(testScheduler))
         val controller = AetherNetworkController(
             contextWithFilesDir(tmpDir),
             bridge = bridge,
-            scope = scope
+            scope = scope,
+            router = router
         )
         return controller to scope
+    }
+
+    /** Records routing calls so tests can assert proxy wiring. */
+    private class FakeRouter : AetherTrafficRouter {
+        var routedThrough: Pair<String, Int>? = null
+        var directCalls = 0
+
+        override fun routeThrough(host: String, port: Int) {
+            routedThrough = host to port
+        }
+
+        override fun routeDirect() {
+            directCalls++
+        }
     }
 
     /** Advances virtual time until [condition] is true (max ~10 s virtual). */
@@ -116,7 +128,8 @@ class AetherNetworkControllerTest {
     fun `start transitions to RUNNING and sends expected payloads`() = runTest {
         val tmp = kotlin.io.path.createTempDirectory("aether-ctrl").toFile()
         val bridge = FakeAetherBridge()
-        val (controller, scope) = controllerWith(tmp, bridge)
+        val router = FakeRouter()
+        val (controller, scope) = controllerWith(tmp, bridge, router)
 
         controller.start(AetherConfig(AetherProtocol.MASQUE, AetherScanMode.THOROUGH))
         until { controller.state.value == AetherState.RUNNING }
@@ -137,7 +150,11 @@ class AetherNetworkControllerTest {
         assertTrue(tunnelPayload.contains("1.2.3.4:443"))
         assertTrue(tunnelPayload.contains("127.0.0.1:1819"))
 
+        // Traffic routing must be applied on RUNNING: loopback Aether listener.
+        assertEquals("127.0.0.1" to 1819, router.routedThrough)
+
         controller.stop()
+        assertTrue(router.directCalls > 0)
         scope.cancel()
         tmp.deleteRecursively()
     }

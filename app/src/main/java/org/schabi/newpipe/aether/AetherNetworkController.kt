@@ -36,7 +36,8 @@ import kotlinx.serialization.json.long
 class AetherNetworkController(
     private val context: Context,
     private val bridge: AetherBridge = NativeAetherBridge,
-    private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO),
+    private val router: AetherTrafficRouter = DefaultAetherTrafficRouter()
 ) {
     // Loopback listeners bound by the Aether tunnel inside this process.
     // Fixed ports keep the integration stable; bind is loopback-only.
@@ -83,6 +84,7 @@ class AetherNetworkController(
         engineJob?.cancel()
         engineJob = null
         releaseResources()
+        routeDirect()
         _state.value = AetherState.STOPPED
     }
 
@@ -115,6 +117,7 @@ class AetherNetworkController(
                 _state.value = AetherState.CONNECTING
                 tunnelJob = startTunnel(config, endpoint)
                 _state.value = AetherState.RUNNING
+                routeThrough()
 
                 val dropped = awaitTunnelTermination()
                 if (!dropped) {
@@ -122,6 +125,7 @@ class AetherNetworkController(
                     break
                 }
                 _state.value = AetherState.RECONNECTING
+                routeDirect()
                 _lastError.value = AetherError.ConnectionLost
                 reconnectBackoff()
             }
@@ -129,16 +133,32 @@ class AetherNetworkController(
             _lastError.value = AetherError.EngineFailure(
                 "Alutube connection failed: ${e.message ?: "unknown engine error"}"
             )
+            routeDirect()
             _state.value = AetherState.ERROR
         } catch (e: UnsatisfiedLinkError) {
             _lastError.value = AetherError.NativeLibraryUnavailable
+            routeDirect()
             _state.value = AetherState.ERROR
         } catch (e: Throwable) {
             _lastError.value = AetherError.Unknown(
                 "Alutube connection failed: ${e.message ?: "unexpected error"}"
             )
+            routeDirect()
             _state.value = AetherState.ERROR
         }
+    }
+
+    /**
+     * Route app traffic (OkHttp + HttpURLConnection stacks) through the Aether
+     * SOCKS listener. Loopback is excluded inside the selector, so the
+     * control channel and the Aether listeners themselves stay direct.
+     */
+    private fun routeThrough() {
+        runCatching { router.routeThrough("127.0.0.1", socksPort) }
+    }
+
+    private fun routeDirect() {
+        runCatching { router.routeDirect() }
     }
 
     /** Opens (loads or provisions) the identity, blocking until the job ends. */
