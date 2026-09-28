@@ -37,12 +37,16 @@ class AetherNetworkController(
     private val context: Context,
     private val bridge: AetherBridge = NativeAetherBridge,
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO),
-    private val router: AetherTrafficRouter = DefaultAetherTrafficRouter()
+    private val router: AetherTrafficRouter = DefaultAetherTrafficRouter(),
+    portSeed: Long = System.nanoTime(),
+    private val identityStore: AetherIdentityStore? = null
 ) {
     // Loopback listeners bound by the Aether tunnel inside this process.
-    // Fixed ports keep the integration stable; bind is loopback-only.
-    internal val socksPort = 1819
-    internal val httpPort = 1820
+    // Ports are derived from a per-instance seed so every app start uses fresh
+    // ports (avoiding collisions with other apps / stale sockets), while tests
+    // can inject a fixed seed for determinism. Bind stays loopback-only.
+    internal val socksPort: Int = PORT_RANGE.first + (portSeed.toInt() and PORT_RANGE_MASK) % PORT_RANGE.count()
+    internal val httpPort: Int = socksPort + 1
 
     private val _state = MutableStateFlow(AetherState.DISABLED)
     val state: StateFlow<AetherState> = _state.asStateFlow()
@@ -57,7 +61,8 @@ class AetherNetworkController(
     private var engineJob: Job? = null
 
     private val identityFile: File
-        get() = File(context.filesDir, "aether/aether.toml")
+        get() = identityStore?.decryptForEngine()
+            ?: File(context.filesDir, "aether/aether.toml")
 
     init {
         identityFile.parentFile?.mkdirs()
@@ -87,6 +92,7 @@ class AetherNetworkController(
         engineJob = null
         releaseResources()
         routeDirect()
+        identityStore?.encryptAtRest()
         _state.value = AetherState.STOPPED
     }
 
@@ -301,6 +307,10 @@ class AetherNetworkController(
 
     companion object {
         private const val MAX_BACKOFF_ATTEMPTS = 6 // up to 60 s
+
+        // Ephemeral-port-like range for the loopback Aether listeners.
+        private val PORT_RANGE = 20000..30000
+        private const val PORT_RANGE_MASK = 0x7fff
     }
 
     private fun releaseResources() {

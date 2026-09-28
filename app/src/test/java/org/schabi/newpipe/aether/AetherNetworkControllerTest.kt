@@ -3,6 +3,7 @@ package org.schabi.newpipe.aether
 import android.content.Context
 import java.io.File
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.TestScope
@@ -22,6 +23,7 @@ import org.mockito.Mockito.`when`
  * touched; the JSON payloads / states are produced by [FakeAetherBridge].
  * The controller runs on the test scheduler so time advances deterministically.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 class AetherNetworkControllerTest {
 
     private fun contextWithFilesDir(tmpDir: File): Context {
@@ -90,13 +92,14 @@ class AetherNetworkControllerTest {
     }
 
 /** Creates a controller bound to the test scheduler. */
-    private fun TestScope.controllerWith(tmpDir: File, bridge: FakeAetherBridge, router: AetherTrafficRouter = FakeRouter()): Pair<AetherNetworkController, CoroutineScope> {
+    private fun TestScope.controllerWith(tmpDir: File, bridge: FakeAetherBridge, router: AetherTrafficRouter = FakeRouter(), portSeed: Long = 0L): Pair<AetherNetworkController, CoroutineScope> {
         val scope = CoroutineScope(SupervisorJob() + UnconfinedTestDispatcher(testScheduler))
         val controller = AetherNetworkController(
             contextWithFilesDir(tmpDir),
             bridge = bridge,
             scope = scope,
-            router = router
+            router = router,
+            portSeed = portSeed
         )
         return controller to scope
     }
@@ -148,10 +151,11 @@ class AetherNetworkControllerTest {
 
         val tunnelPayload = bridge.tunnelPayloads.single()
         assertTrue(tunnelPayload.contains("1.2.3.4:443"))
-        assertTrue(tunnelPayload.contains("127.0.0.1:1819"))
+        assertTrue(tunnelPayload.contains("127.0.0.1:20000"))
+        assertTrue(tunnelPayload.contains("127.0.0.1:20001"))
 
         // Traffic routing must be applied on RUNNING: loopback Aether listener.
-        assertEquals("127.0.0.1" to 1819, router.routedThrough)
+        assertEquals("127.0.0.1" to 20000, router.routedThrough)
 
         controller.stop()
         assertTrue(router.directCalls > 0)
@@ -205,6 +209,30 @@ class AetherNetworkControllerTest {
 
         assertEquals(AetherState.RECONNECTING, controller.state.value)
         scope.cancel()
+        tmp.deleteRecursively()
+    }
+
+    @Test
+    fun `ports are derived from the seed and stay in range`() = runTest {
+        val tmp = kotlin.io.path.createTempDirectory("aether-ctrl").toFile()
+        val bridge = FakeAetherBridge()
+
+        // Different seeds produce different ports.
+        val (controllerA, scopeA) = controllerWith(tmp, bridge, portSeed = 0L)
+        val (controllerB, scopeB) = controllerWith(tmp, bridge, portSeed = 12345L)
+        val (controllerC, scopeC) = controllerWith(tmp, bridge, portSeed = 12345L)
+
+        assertTrue(controllerA.socksPort in 20000..30000)
+        assertTrue(controllerB.socksPort in 20000..30000)
+        assertTrue(controllerA.socksPort != controllerB.socksPort)
+        // Same seed -> same ports (deterministic for tests/restarts).
+        assertEquals(controllerB.socksPort, controllerC.socksPort)
+        // http = socks + 1.
+        assertEquals(controllerA.httpPort, controllerA.socksPort + 1)
+
+        scopeA.cancel()
+        scopeB.cancel()
+        scopeC.cancel()
         tmp.deleteRecursively()
     }
 }
