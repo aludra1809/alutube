@@ -71,11 +71,13 @@ class AetherNetworkController(
     /**
      * Start the engine with the given configuration. Idempotent: calling
      * while running is a no-op; call [stop] first to reconfigure via
-     * [updateConfiguration].
+     * [updateConfiguration]. A single engine job is guaranteed — duplicate
+     * starts cannot spawn parallel tunnel jobs.
      */
     fun start(config: AetherConfig) {
         if (engineJob?.isActive == true) return
         _lastError.value = null
+        reconnectAttempt = 0
         engineJob = scope.launch { runEngine(config) }
     }
 
@@ -117,6 +119,7 @@ class AetherNetworkController(
                 _state.value = AetherState.CONNECTING
                 tunnelJob = startTunnel(config, endpoint)
                 _state.value = AetherState.RUNNING
+                reconnectAttempt = 0 // reset backoff on a successful connect
                 routeThrough()
 
                 val dropped = awaitTunnelTermination()
@@ -286,10 +289,18 @@ class AetherNetworkController(
         return null
     }
 
+    private var reconnectAttempt = 0
+
     private suspend fun reconnectBackoff() {
-        delay(1_000)
-        delay(1_000)
-        delay(3_000)
+        // Bounded exponential backoff: 1s, 2s, 4s, 8s, 16s, ... capped at 60s.
+        val attempt = reconnectAttempt.coerceAtMost(MAX_BACKOFF_ATTEMPTS)
+        val delayMs = (1L shl attempt).coerceAtMost(60_000L)
+        reconnectAttempt++
+        delay(delayMs)
+    }
+
+    companion object {
+        private const val MAX_BACKOFF_ATTEMPTS = 6 // up to 60 s
     }
 
     private fun releaseResources() {

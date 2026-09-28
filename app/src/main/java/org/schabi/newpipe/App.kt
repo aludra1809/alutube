@@ -27,6 +27,7 @@ import java.net.SocketException
 import org.acra.ACRA.init
 import org.acra.ACRA.isACRASenderServiceProcess
 import org.acra.config.CoreConfigurationBuilder
+import org.schabi.newpipe.aether.AetherLifecycleController
 import org.schabi.newpipe.error.ReCaptchaActivity
 import org.schabi.newpipe.extractor.NewPipe
 import org.schabi.newpipe.extractor.downloader.Downloader
@@ -102,6 +103,11 @@ open class App :
             Localization.getPreferredContentCountry(this)
         )
         Localization.initPrettyTime(Localization.resolvePrettyTime())
+
+        // Start the embedded Aether controller (auto-starts the tunnel when
+        // the "Enable Alutube connection" preference is on). Safe to call in
+        // every normal process; load failures degrade to a disabled state.
+        AetherLifecycleController(this).initialize()
 
         BridgeStateSaverInitializer.init(this)
         StateSaver.init(this)
