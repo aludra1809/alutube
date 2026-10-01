@@ -1,0 +1,99 @@
+/*
+ * SPDX-FileCopyrightText: 2026 Alutube contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
+ * Builds the Aether bridge crate (`aether-bridge/`) for Android ABIs with
+ * cargo-ndk and places the resulting `libaether_bridge.so` into the default
+ * jniLibs source directory, so a plain `assemble<BuildType>` APK/AAB contains
+ * it without any manual copy step. The bridge crate links the vendored
+ * `aether` crate (path dependency), so this single `.so` carries the whole
+ * engine plus the JNI glue.
+ *
+ * Groovy is used (not .gradle.kts) because Android lint's Kotlin build-script
+ * analysis crashes (findFirCompiledSymbol / KotlinScriptUClass) on Kotlin-DSL
+ * task definitions — an upstream lint bug. Groovy scripts take a different
+ * analysis path and lint passes.
+ *
+ * Requirements (see docs/toolchain.md):
+ *   - Rust stable >= 1.98 with targets aarch64-linux-android,
+ *     armv7-linux-androideabi, x86_64-linux-android
+ *   - cargo-ndk
+ *   - Android NDK r26d (ANDROID_NDK_HOME / ANDROID_NDK_ROOT)
+ *   - cmake + C/C++ toolchain on the host (BoringSSL is built by boring-sys)
+ *   - libclang (bindgen) available on the host, exposed via LIBCLANG_PATH
+ *
+ * Control:
+ *   ./gradlew assembleDebug                       -> builds Aether natively
+ *   ./gradlew assembleDebug -PaetherNative=off    -> skips the native build
+ *   ./gradlew :app:aetherBuildNative              -> build only
+ */
+
+def aetherEnabled = (project.findProperty('aetherNative') ?: 'on').toString().toLowerCase() in ['on', 'true']
+
+def aetherAbis = ['arm64-v8a', 'armeabi-v7a', 'x86_64']
+
+def aetherBridgeDir = rootProject.projectDir.toPath().resolve('aether-bridge').toFile()
+def aetherCrateDir = rootProject.projectDir.toPath().resolve('aether/aether').toFile()
+def aetherJniLibsDir = project.layout.projectDirectory.dir('src/main/jniLibs')
+
+def aetherNdkPlatform = (project.findProperty('aetherNdkPlatform') ?: '23').toString()
+
+def ndkHome = System.getenv('ANDROID_NDK_HOME') ?: System.getenv('ANDROID_NDK_ROOT')
+
+tasks.register('aetherBuildNative', Exec) {
+    group = 'aether'
+    description = 'Builds the Aether bridge (engine + JNI glue) for Android ABIs with cargo-ndk'
+    workingDir aetherBridgeDir
+
+    inputs.dir aetherBridgeDir.toPath().resolve('src').toFile()
+    inputs.file aetherBridgeDir.toPath().resolve('Cargo.toml').toFile()
+    inputs.file aetherBridgeDir.toPath().resolve('Cargo.lock').toFile()
+    inputs.dir aetherCrateDir.toPath().resolve('src').toFile()
+    inputs.file aetherCrateDir.toPath().resolve('Cargo.toml').toFile()
+    inputs.file aetherCrateDir.toPath().resolve('Cargo.lock').toFile()
+    inputs.dir rootProject.projectDir.toPath().resolve('aether/quiche/quiche').toFile()
+    inputs.dir rootProject.projectDir.toPath().resolve('aether/quiche/octets').toFile()
+    outputs.dir aetherJniLibsDir
+
+    environment 'ANDROID_NDK_HOME', ndkHome
+    environment 'ANDROID_NDK_ROOT', ndkHome
+
+    // Pass the caller's LIBCLANG_PATH / LD_LIBRARY_PATH through so boring-sys /
+    // bindgen can find the host libclang when it is not on default paths.
+    environment 'LIBCLANG_PATH', System.getenv('LIBCLANG_PATH')
+    environment 'LD_LIBRARY_PATH', System.getenv('LD_LIBRARY_PATH')
+
+    // Build the argument list explicitly (no spread).
+    def ndkArgs = ['cargo', 'ndk']
+    for (abi in aetherAbis) {
+        ndkArgs.add('-t')
+        ndkArgs.add(abi)
+    }
+    ndkArgs.add('--platform')
+    ndkArgs.add(aetherNdkPlatform)
+    ndkArgs.add('-o')
+    ndkArgs.add(aetherJniLibsDir.asFile.absolutePath)
+    ndkArgs.add('build')
+    ndkArgs.add('--release')
+    ndkArgs.add('--locked')
+    commandLine ndkArgs
+
+    doFirst {
+        if (!ndkHome) {
+            throw new GradleException(
+                'Aether native build requires the Android NDK. Set ANDROID_NDK_HOME ' +
+                    '(or ANDROID_NDK_ROOT). See docs/toolchain.md.'
+            )
+        }
+    }
+
+    onlyIf { aetherEnabled }
+}
+
+// Make sure jniLibs sources are available before packaging and that a normal
+// `assembleDebug` triggers the native build (unless opted out).
+if (aetherEnabled) {
+    tasks.named('preBuild').configure {
+        dependsOn tasks.named('aetherBuildNative')
+    }
+}

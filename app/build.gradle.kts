@@ -357,4 +357,4 @@ aboutLibraries {
 }
 
 // Aether native library build (cargo-ndk). Off with -PaetherNative=off.
-apply(from = "aether-native.gradle.kts")
+apply(from = "aether-native.gradle")
