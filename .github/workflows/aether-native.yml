@@ -40,7 +40,9 @@ jobs:
             target: x86_64-linux-android
     defaults:
       run:
-        working-directory: aether/aether
+        # The bridge crate (aether-bridge/) produces libaether_bridge.so and
+        # depends on ../aether/aether by path; build from there.
+        working-directory: aether-bridge
     steps:
       - uses: actions/checkout@v6
         with:
@@ -66,16 +68,16 @@ jobs:
       - name: Install cargo-ndk
         run: cargo install cargo-ndk --locked
 
-      - name: Build Aether library (no tor feature)
+      - name: Build Aether bridge library (no tor feature)
         env:
           ANDROID_NDK_HOME: ${{ steps.ndk.outputs.ndk-path }}
           ANDROID_NDK_ROOT: ${{ steps.ndk.outputs.ndk-path }}
-        run: cargo ndk -t ${{ matrix.abi }} --platform 23 -o ../../../app/src/main/jniLibs build --release --locked
+        run: cargo ndk -t ${{ matrix.abi }} --platform 23 -o ../app/src/main/jniLibs build --release --locked
 
       - name: Verify libaether_bridge.so exists
         run: |
-          test -f ../../../app/src/main/jniLibs/${{ matrix.abi }}/libaether_bridge.so
-          ls -la ../../../app/src/main/jniLibs/${{ matrix.abi }}/
+          test -f ../app/src/main/jniLibs/${{ matrix.abi }}/libaether_bridge.so
+          ls -la ../app/src/main/jniLibs/${{ matrix.abi }}/
 
   gradle-packaging:
     runs-on: ubuntu-latest
