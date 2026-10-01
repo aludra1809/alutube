@@ -27,12 +27,18 @@ class AetherBrandingInstrumentedTest {
             .getApplicationInfo(context.packageName, 0)
             .loadLabel(context.packageManager)
             .toString()
-        assertEquals("Alutube", label)
+        // Debug builds append the git branch name (e.g. "Alutube main"), so
+        // assert the Alutube prefix rather than an exact match.
+        assertTrue("app label must be Alutube-branded, got \"$label\"", label.startsWith("Alutube"))
     }
 
     @Test
     fun applicationIdIsAlutube() {
-        assertEquals("org.alutube.app.debug", context.packageName)
+        // Debug builds append ".debug" plus the git branch suffix.
+        assertTrue(
+            "applicationId must be Alutube-branded, got ${context.packageName}",
+            context.packageName.startsWith("org.alutube.app")
+        )
     }
 
     @Test

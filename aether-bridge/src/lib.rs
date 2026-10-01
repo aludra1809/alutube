@@ -81,7 +81,7 @@ fn with_payload(env: &mut JNIEnv, raw: &JString, call: impl FnOnce(*const c_char
 // ---------------------------------------------------------------------------
 
 #[no_mangle]
-pub extern "system" fn Java_org_schabi_newpipe_aether_NativeAetherBridge_version(
+pub extern "system" fn Java_org_schabi_newpipe_aether_NativeAetherBridge_nativeVersion(
     env: JNIEnv<'_>,
     _class: JClass<'_>,
 ) -> jstring {
@@ -91,7 +91,7 @@ pub extern "system" fn Java_org_schabi_newpipe_aether_NativeAetherBridge_version
 }
 
 #[no_mangle]
-pub extern "system" fn Java_org_schabi_newpipe_aether_NativeAetherBridge_identityOpen(
+pub extern "system" fn Java_org_schabi_newpipe_aether_NativeAetherBridge_nativeIdentityOpen(
     env: JNIEnv<'_>,
     _class: JClass<'_>,
     payload: JString<'_>,
@@ -106,7 +106,7 @@ pub extern "system" fn Java_org_schabi_newpipe_aether_NativeAetherBridge_identit
 }
 
 #[no_mangle]
-pub extern "system" fn Java_org_schabi_newpipe_aether_NativeAetherBridge_identitySummary(
+pub extern "system" fn Java_org_schabi_newpipe_aether_NativeAetherBridge_nativeIdentitySummary(
     env: JNIEnv<'_>,
     _class: JClass<'_>,
     id: jlong,
@@ -119,7 +119,7 @@ pub extern "system" fn Java_org_schabi_newpipe_aether_NativeAetherBridge_identit
 }
 
 #[no_mangle]
-pub extern "system" fn Java_org_schabi_newpipe_aether_NativeAetherBridge_identityFree(
+pub extern "system" fn Java_org_schabi_newpipe_aether_NativeAetherBridge_nativeIdentityFree(
     env: JNIEnv<'_>,
     _class: JClass<'_>,
     id: jlong,
@@ -130,7 +130,7 @@ pub extern "system" fn Java_org_schabi_newpipe_aether_NativeAetherBridge_identit
 }
 
 #[no_mangle]
-pub extern "system" fn Java_org_schabi_newpipe_aether_NativeAetherBridge_scanStart(
+pub extern "system" fn Java_org_schabi_newpipe_aether_NativeAetherBridge_nativeScanStart(
     env: JNIEnv<'_>,
     _class: JClass<'_>,
     identity: jlong,
@@ -146,7 +146,7 @@ pub extern "system" fn Java_org_schabi_newpipe_aether_NativeAetherBridge_scanSta
 }
 
 #[no_mangle]
-pub extern "system" fn Java_org_schabi_newpipe_aether_NativeAetherBridge_verifyStart(
+pub extern "system" fn Java_org_schabi_newpipe_aether_NativeAetherBridge_nativeVerifyStart(
     env: JNIEnv<'_>,
     _class: JClass<'_>,
     identity: jlong,
@@ -162,7 +162,7 @@ pub extern "system" fn Java_org_schabi_newpipe_aether_NativeAetherBridge_verifyS
 }
 
 #[no_mangle]
-pub extern "system" fn Java_org_schabi_newpipe_aether_NativeAetherBridge_tunnelStart(
+pub extern "system" fn Java_org_schabi_newpipe_aether_NativeAetherBridge_nativeTunnelStart(
     env: JNIEnv<'_>,
     _class: JClass<'_>,
     identity: jlong,
@@ -178,7 +178,7 @@ pub extern "system" fn Java_org_schabi_newpipe_aether_NativeAetherBridge_tunnelS
 }
 
 #[no_mangle]
-pub extern "system" fn Java_org_schabi_newpipe_aether_NativeAetherBridge_coreStart(
+pub extern "system" fn Java_org_schabi_newpipe_aether_NativeAetherBridge_nativeCoreStart(
     env: JNIEnv<'_>,
     _class: JClass<'_>,
     args: JString<'_>,
@@ -193,7 +193,7 @@ pub extern "system" fn Java_org_schabi_newpipe_aether_NativeAetherBridge_coreSta
 }
 
 #[no_mangle]
-pub extern "system" fn Java_org_schabi_newpipe_aether_NativeAetherBridge_jobPoll(
+pub extern "system" fn Java_org_schabi_newpipe_aether_NativeAetherBridge_nativeJobPoll(
     env: JNIEnv<'_>,
     _class: JClass<'_>,
     id: jlong,
@@ -204,7 +204,7 @@ pub extern "system" fn Java_org_schabi_newpipe_aether_NativeAetherBridge_jobPoll
 }
 
 #[no_mangle]
-pub extern "system" fn Java_org_schabi_newpipe_aether_NativeAetherBridge_jobCancel(
+pub extern "system" fn Java_org_schabi_newpipe_aether_NativeAetherBridge_nativeJobCancel(
     env: JNIEnv<'_>,
     _class: JClass<'_>,
     id: jlong,
@@ -215,7 +215,7 @@ pub extern "system" fn Java_org_schabi_newpipe_aether_NativeAetherBridge_jobCanc
 }
 
 #[no_mangle]
-pub extern "system" fn Java_org_schabi_newpipe_aether_NativeAetherBridge_jobFree(
+pub extern "system" fn Java_org_schabi_newpipe_aether_NativeAetherBridge_nativeJobFree(
     env: JNIEnv<'_>,
     _class: JClass<'_>,
     id: jlong,
