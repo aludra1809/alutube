@@ -145,6 +145,19 @@ configure<ApplicationExtension> {
             )
         }
     }
+
+    // Per-ABI APK splits: produces app-<abi>.apk for each Aether-supported ABI
+    // plus app-universal.apk containing all of them. Used by the CI release
+    // packaging so users get a smaller arm64-v8a / armeabi-v7a APK and a
+    // universal fallback. x86_64 is kept in the universal APK (emulator use).
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include("arm64-v8a", "armeabi-v7a", "x86_64")
+            isUniversalApk = true
+        }
+    }
 }
 
 ksp {

@@ -135,6 +135,33 @@ jobs:
 
       - name: Verify Aether libraries packaged into APK
         run: |
-          APK=$(ls app/build/outputs/apk/continuous/*.apk | head -1)
-          echo "APK: $APK"
-          unzip -l "$APK" | grep -E "lib/(arm64-v8a|armeabi-v7a|x86_64)/libaether_bridge.so"
+          echo "Generated APKs:"
+          ls -la app/build/outputs/apk/continuous/
+          for apk in app/build/outputs/apk/continuous/*.apk; do
+            echo "--- $apk ---"
+            unzip -l "$apk" | grep -E "lib/(arm64-v8a|armeabi-v7a|x86_64)/libaether_bridge.so"
+          done
+
+      - name: Upload Alutube APK - arm64-v8a
+        if: hashFiles('app/build/outputs/apk/continuous/*arm64-v8a*.apk') != ''
+        uses: actions/upload-artifact@v7
+        with:
+          name: alutube-arm64-v8a
+          path: app/build/outputs/apk/continuous/*arm64-v8a*.apk
+          if-no-files-found: error
+
+      - name: Upload Alutube APK - armeabi-v7a
+        if: hashFiles('app/build/outputs/apk/continuous/*armeabi-v7a*.apk') != ''
+        uses: actions/upload-artifact@v7
+        with:
+          name: alutube-armeabi-v7a
+          path: app/build/outputs/apk/continuous/*armeabi-v7a*.apk
+          if-no-files-found: error
+
+      - name: Upload Alutube APK - universal
+        if: hashFiles('app/build/outputs/apk/continuous/*universal*.apk') != ''
+        uses: actions/upload-artifact@v7
+        with:
+          name: alutube-universal
+          path: app/build/outputs/apk/continuous/*universal*.apk
+          if-no-files-found: error
