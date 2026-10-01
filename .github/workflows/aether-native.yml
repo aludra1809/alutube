@@ -65,6 +65,13 @@ jobs:
         with:
           ndk-version: r26d
 
+      - name: Install libclang (bindgen dependency for boring-sys)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libclang-dev
+          LIBCLANG_DIR=$(find /usr/lib -name 'libclang.so*' -path '*llvm*' 2>/dev/null | head -1 | xargs dirname)
+          echo "LIBCLANG_PATH=$LIBCLANG_DIR" >> "$GITHUB_ENV"
+
       - name: Install cargo-ndk
         run: cargo install cargo-ndk --locked
 
@@ -109,6 +116,13 @@ jobs:
         uses: nttld/setup-ndk@v1
         with:
           ndk-version: r26d
+
+      - name: Install libclang (bindgen dependency for boring-sys)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libclang-dev
+          LIBCLANG_DIR=$(find /usr/lib -name 'libclang.so*' -path '*llvm*' 2>/dev/null | head -1 | xargs dirname)
+          echo "LIBCLANG_PATH=$LIBCLANG_DIR" >> "$GITHUB_ENV"
 
       - name: Install cargo-ndk and cargo-ndk cache for Gradle
         run: cargo install cargo-ndk --locked
