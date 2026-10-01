@@ -49,23 +49,6 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.ref }}
           persist-credentials: false
 
-      - name: Pre-warm JitPack extractor artifact
-        # NewPipeExtractor is pinned to a commit; JitPack builds commit
-        # artifacts on demand and returns 404 until the build finishes (and
-        # evicts them when cold). Poll the POM so Gradle's single resolution
-        # attempt succeeds. Fails fast after ~10 minutes.
-        env:
-          EXTRACTOR: "com/github/TeamNewPipe/NewPipeExtractor/13a655fe53e0c3065f88725fc1fb594c3ede0169/NewPipeExtractor-13a655fe53e0c3065f88725fc1fb594c3ede0169.pom"
-        run: |
-          for i in $(seq 1 60); do
-            code=$(curl -s -o /dev/null -w "%{http_code}" "https://jitpack.io/$EXTRACTOR" || true)
-            echo "JitPack poll $i: HTTP $code"
-            [ "$code" = "200" ] && echo "JitPack artifact ready" && exit 0
-            sleep 10
-          done
-          echo "JitPack artifact did not become available in time" >&2
-          exit 1
-
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
@@ -103,19 +86,6 @@ jobs:
       - uses: actions/checkout@v6
         with:
           ref: ${{ github.event.pull_request.head.sha || github.ref }}
-
-      - name: Pre-warm JitPack extractor artifact
-        env:
-          EXTRACTOR: "com/github/TeamNewPipe/NewPipeExtractor/13a655fe53e0c3065f88725fc1fb594c3ede0169/NewPipeExtractor-13a655fe53e0c3065f88725fc1fb594c3ede0169.pom"
-        run: |
-          for i in $(seq 1 60); do
-            code=$(curl -s -o /dev/null -w "%{http_code}" "https://jitpack.io/$EXTRACTOR" || true)
-            echo "JitPack poll $i: HTTP $code"
-            [ "$code" = "200" ] && echo "JitPack artifact ready" && exit 0
-            sleep 10
-          done
-          echo "JitPack artifact did not become available in time" >&2
-          exit 1
 
       - name: set up JDK
         uses: actions/setup-java@v5

@@ -16,7 +16,7 @@ vendored upstream projects are tracked.
 | Component | Source | Pinned |
 |-----------|--------|--------|
 | Alutube app (NewPipe-derived) | `upstream` | `dev` branch commit `d4eb42edc` (`v0.29.1-52-gd4eb42edc`), baselined in the initial commit |
-| NewPipe Extractor | JitPack artifact `com.github.TeamNewPipe:NewPipeExtractor` | commit `13a655fe53e0c3065f88725fc1fb594c3ede0169` (see `gradle/libs.versions.toml`) |
+| NewPipe Extractor | JitPack artifact `com.github.TeamNewPipe:NewPipeExtractor` | commit `13a655fe53e0c3065f88725fc1fb594c3ede0169` — declared as short hash `13a655fe` (see `gradle/libs.versions.toml`) because JitPack sometimes deletes full-hash artifacts; the short hash resolves to the same commit (upstream NewPipe workaround) |
 | Aether | `aether-upstream` | tag `v2.0.0` / commit `0e6f6a5`, vendored at `aether/` |
 
 ## Branch strategy
