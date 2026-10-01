@@ -72,9 +72,9 @@ jobs:
           ANDROID_NDK_ROOT: ${{ steps.ndk.outputs.ndk-path }}
         run: cargo ndk -t ${{ matrix.abi }} --platform 23 -o ../../../app/src/main/jniLibs build --release --locked
 
-      - name: Verify libaether.so exists
+      - name: Verify libaether_bridge.so exists
         run: |
-          test -f ../../../app/src/main/jniLibs/${{ matrix.abi }}/libaether.so
+          test -f ../../../app/src/main/jniLibs/${{ matrix.abi }}/libaether_bridge.so
           ls -la ../../../app/src/main/jniLibs/${{ matrix.abi }}/
 
   gradle-packaging:
@@ -121,4 +121,4 @@ jobs:
         run: |
           APK=$(ls app/build/outputs/apk/continuous/*.apk | head -1)
           echo "APK: $APK"
-          unzip -l "$APK" | grep -E "lib/(arm64-v8a|armeabi-v7a|x86_64)/libaether.so"
+          unzip -l "$APK" | grep -E "lib/(arm64-v8a|armeabi-v7a|x86_64)/libaether_bridge.so"
