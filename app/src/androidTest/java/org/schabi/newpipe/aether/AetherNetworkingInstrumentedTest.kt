@@ -21,13 +21,15 @@ import org.schabi.newpipe.DownloaderImpl
 @RunWith(AndroidJUnit4::class)
 class AetherNetworkingInstrumentedTest {
 
+    private val emptyHeaders: Map<String, List<String>> = mapOf()
+
     @Test
     fun directModeFetchStillWorks() {
         // Aether off -> exact original direct client must resolve the network.
         val downloader = DownloaderImpl.getInstance()
         assertNotNull("DownloaderImpl must be initialised", downloader)
         downloader.setProxy(null)
-        val response = downloader.get("https://example.com/", null)
+        val response = downloader.get("https://example.com/", emptyHeaders)
         assertNotNull(response)
         assertTrue(
             "expected a 2xx/3xx status, got ${response!!.responseCode()}",
@@ -40,8 +42,11 @@ class AetherNetworkingInstrumentedTest {
         val downloader = DownloaderImpl.getInstance()
         downloader.setProxy(Proxy.NO_PROXY)
         // Proxy.NO_PROXY is effectively direct; the client must still work.
-        val response = downloader.get("https://example.com/", null)
+        val response = downloader.get("https://example.com/", emptyHeaders)
         assertNotNull(response)
-        assertEquals(200, response?.responseCode()?.let { if (it in 200..399) 200 else it })
+        assertTrue(
+            "expected a 2xx/3xx status, got ${response!!.responseCode()}",
+            response.responseCode() in 200..399
+        )
     }
 }
