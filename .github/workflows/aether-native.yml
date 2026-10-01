@@ -12,7 +12,7 @@ on:
       - main
     paths:
       - 'aether/**'
-      - 'app/aether-native.gradle.kts'
+      - 'app/aether-native.gradle'
       - 'app/build.gradle.kts'
       - '.github/workflows/aether-native.yml'
   push:
@@ -20,7 +20,7 @@ on:
       - main
     paths:
       - 'aether/**'
-      - 'app/aether-native.gradle.kts'
+      - 'app/aether-native.gradle'
       - 'app/build.gradle.kts'
       - '.github/workflows/aether-native.yml'
 
@@ -44,6 +44,9 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
+          # Check out the actual event ref (the repo's GitHub default branch
+          # may still be named "master", which does not exist in this repo).
+          ref: ${{ github.event.pull_request.head.sha || github.ref }}
           persist-credentials: false
 
       - name: Install Rust toolchain
@@ -81,6 +84,8 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.ref }}
 
       - name: set up JDK
         uses: actions/setup-java@v5

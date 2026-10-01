@@ -40,6 +40,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
+        with:
+          # Check out the actual event ref (push/PR branch, or dispatch ref);
+          # the repo's default branch may still be named "master" on GitHub,
+          # which does not exist in this repository.
+          ref: ${{ github.event.pull_request.head.sha || github.ref }}
       - uses: gradle/actions/wrapper-validation@v6
 
       - name: create and checkout branch
