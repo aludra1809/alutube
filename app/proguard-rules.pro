@@ -3,6 +3,15 @@
 ## Helps debug release versions
 -dontobfuscate
 
+## Alutube: Aether JNI bridge.
+# The external fun methods on NativeAetherBridge are invoked from native code
+# (libaether_bridge.so) by JNI symbol lookup — R8 cannot see these references
+# and would otherwise strip the methods/class, breaking the JNI binding at
+# runtime in minified builds. Keep the whole class and its native methods.
+-keep class org.schabi.newpipe.aether.NativeAetherBridge {
+    native <methods>;
+}
+
 ## Rules for NewPipeExtractor
 -keep class org.schabi.newpipe.extractor.timeago.patterns.** { *; }
 ## Rules for Rhino and Rhino Engine
