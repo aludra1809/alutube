@@ -1,4 +1,4 @@
-name: "Build unsigned release APK on master"
+name: "Build Alutube APKs"
 
 on:
   workflow_dispatch:
@@ -9,7 +9,8 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: 'master'
+          # The repo's default branch is "main"; never "master".
+          ref: ${{ github.ref || 'main' }}
 
       - uses: actions/setup-java@v5
         with:
@@ -17,22 +18,60 @@ jobs:
           java-version: '21'
           cache: 'gradle'
 
-      - name: "Build release APK"
-        run: ./gradlew assembleRelease --stacktrace
+      # --- Rust/NDK toolchain (Aether native build) ---
+      - name: Install Rust toolchain (all Android targets)
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android, armv7-linux-androideabi, x86_64-linux-android
 
-      - name: "Rename APK"
+      - name: Install CMake
+        uses: lukka/get-cmake@latest
+
+      - name: Install Android NDK
+        id: ndk
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r26d
+
+      - name: Install libclang (bindgen dependency for boring-sys)
         run: |
-          VERSION_NAME="$(jq -r ".elements[0].versionName" "app/build/outputs/apk/release/output-metadata.json")"
-          echo "Version name: $VERSION_NAME" >> "$GITHUB_STEP_SUMMARY"
-          echo '```json' >> "$GITHUB_STEP_SUMMARY"
-          cat "app/build/outputs/apk/release/output-metadata.json" >> "$GITHUB_STEP_SUMMARY"
-          echo >> "$GITHUB_STEP_SUMMARY"
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
-          # assume there is only one APK in that folder
-          mv app/build/outputs/apk/release/*.apk "app/build/outputs/apk/release/NewPipe_v$VERSION_NAME.apk"
+          sudo apt-get update
+          sudo apt-get install -y libclang-dev
+          LIBCLANG_DIR=$(find /usr/lib -name 'libclang.so*' -path '*llvm*' 2>/dev/null | head -1 | xargs dirname)
+          echo "LIBCLANG_PATH=$LIBCLANG_DIR" >> "$GITHUB_ENV"
 
-      - name: "Upload APK"
+      - name: Install cargo-ndk
+        run: cargo install cargo-ndk --locked
+
+      # --- Build the ABI-split continuous APKs ---
+      - name: "Build Alutube APKs (arm64-v8a, armeabi-v7a, x86_64, universal)"
+        env:
+          ANDROID_NDK_HOME: ${{ steps.ndk.outputs.ndk-path }}
+          ANDROID_NDK_ROOT: ${{ steps.ndk.outputs.ndk-path }}
+        run: ./gradlew assembleContinuous --stacktrace
+
+      - name: "Verify Aether libraries packaged"
+        run: |
+          for apk in app/build/outputs/apk/continuous/*.apk; do
+            echo "--- $apk ---"
+            unzip -l "$apk" | grep -E "lib/(arm64-v8a|armeabi-v7a|x86_64)/libaether_bridge.so"
+          done
+
+      # --- Upload the three APKs the user wants ---
+      - name: "Upload arm64-v8a APK"
         uses: actions/upload-artifact@v7
         with:
-          name: app
-          path: app/build/outputs/apk/release/*.apk
+          name: alutube-arm64-v8a
+          path: app/build/outputs/apk/continuous/*arm64-v8a*.apk
+
+      - name: "Upload armeabi-v7a APK"
+        uses: actions/upload-artifact@v7
+        with:
+          name: alutube-armeabi-v7a
+          path: app/build/outputs/apk/continuous/*armeabi-v7a*.apk
+
+      - name: "Upload universal APK"
+        uses: actions/upload-artifact@v7
+        with:
+          name: alutube-universal
+          path: app/build/outputs/apk/continuous/*universal*.apk
